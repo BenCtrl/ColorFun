@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
+using System.Xml.Linq;
 
 namespace ColorFun
 {
@@ -13,9 +14,15 @@ namespace ColorFun
         static int selectedColorIndex = 0;
         static string[] colorList = Enum.GetNames(consoleColorType);
 
+        static string colorOne = "";
+        static string colorTwo = "";
+
+        static bool readyToMix = false;
+        static bool menuHeartBeat = true;
+
         static void Main(string[] args)
         {
-            while (true)
+            while (menuHeartBeat)
             {
                 printColorList();
                 handleKeyPress(Console.ReadKey().Key);
@@ -41,6 +48,21 @@ namespace ColorFun
                     Console.ReadLine(); //idk why this is needed to stop program terminating?
 
                     break;
+                case ConsoleKey.Enter:
+                    string chosenColor = colorList[selectedColorIndex];
+
+                    if (!String.IsNullOrEmpty(colorOne) && !String.IsNullOrEmpty(colorTwo))
+                    {
+                        mixColors();
+                    }
+                    else
+                    {
+                        if (String.IsNullOrEmpty(colorOne))
+                            colorOne = chosenColor;
+                        else if (String.IsNullOrEmpty(colorTwo))
+                            colorTwo = chosenColor;
+                    }
+                    break;
             }
         }
 
@@ -49,7 +71,7 @@ namespace ColorFun
             int colorIndex = 0;
 
             Console.Clear();
-            Console.WriteLine("Navigate the list using the Arrow Keys (Do not press TAB): ");
+            Console.WriteLine(" > Navigate the list using the Arrow Keys\n > Enter to select a color (Do not press TAB)\n > Backspace to undo selection\n");
 
             foreach (var name in colorList)
             {
@@ -62,6 +84,64 @@ namespace ColorFun
 
                 Console.WriteLine($" {((selectedColorIndex == colorIndex) ? ">" : " ")} {name} ");
                 colorIndex++;
+            }
+
+            Console.WriteLine("");
+
+            if (!String.IsNullOrEmpty(colorOne) || !String.IsNullOrEmpty(colorTwo))
+            {
+                Console.WriteLine($"Color One: {colorOne}\nColor Two: {colorTwo}");
+            }
+
+            if (!String.IsNullOrEmpty(colorOne) && !String.IsNullOrEmpty(colorTwo))
+            {
+                Console.WriteLine("Press Enter to confirm color selection...");
+            }
+        }
+
+        static void printColorMix()
+        {
+            menuHeartBeat = false;
+
+            Console.Clear();
+            Console.WriteLine("These colors cannot be mixed! D:");
+        }
+
+        static void printColorMix(string finalColorName)
+        {
+            menuHeartBeat = false;
+
+            Console.Clear();
+
+            Console.Write("The final color is");
+            Console.ForegroundColor = getConsoleColor(finalColorName);
+            Console.WriteLine($" {finalColorName}!");
+
+            Console.ForegroundColor = getConsoleColor("White");
+        }
+
+        static void mixColors()
+        {
+            if (colorOne == "Blue" || colorTwo == "Blue")
+            {
+                if (colorOne == "Green" || colorTwo == "Green")
+                    printColorMix("Cyan");
+                else if (colorOne == "Red" || colorTwo == "Red")
+                    printColorMix("Magenta");
+                else if (colorOne == "Yellow" || colorTwo == "Yellow")
+                    printColorMix("Green");
+                else
+                    printColorMix();
+            }
+            else if (colorOne == "Red" || colorTwo == "Red")
+            {
+                if (colorOne == "Green" || colorTwo == "Green")
+                    printColorMix("Yellow");
+                else
+                    printColorMix();
+            } else
+            {
+                printColorMix();
             }
         }
 
